@@ -75,17 +75,12 @@ function startFilter() {
         });
         let transactions = yield fetchData();
         let filteredTransactions = [];
-        rl.question('Enter the customer ID: ', (customerId) => __awaiter(this, void 0, void 0, function* () {
+        rl.question('Enter the customer ID: ', (customerId) => {
             if (customerId != "0") {
                 console.log(`Customer ID entered: ${customerId}`);
                 if (transactions && transactions.length > 0) {
                     filteredTransactions = transactions.filter((transaction) => transaction.customerId === parseInt(customerId));
-                    let deviceArray = yield getDevices(filteredTransactions);
-                    let deviceLinkCustomers = yield findDeviceLink(transactions, deviceArray, parseInt(customerId));
-                    let p2PArray = yield getP2PTransactions(filteredTransactions);
-                    let transactionLinkCustomers = yield findP2PLink(transactions, p2PArray);
-                    let finalOutput = yield buildRelatedCustomers(deviceLinkCustomers, transactionLinkCustomers);
-                    sendOutput(finalOutput);
+                    buildRootTransactions(filteredTransactions);
                 }
                 else {
                     console.error('No transactions data available');
@@ -95,114 +90,94 @@ function startFilter() {
                 process.exit();
             }
             rl.close();
-        }));
+        });
     });
 }
-function getP2PTransactions(filteredTransactions) {
+function buildRootTransactions(filteredTransactions) {
     return __awaiter(this, void 0, void 0, function* () {
-        let p2PArray = [];
+        let nonRootTransactions = [];
+        let rootTransactions = [];
+        let rootObj;
         if (filteredTransactions.length > 0) {
             filteredTransactions.forEach((transaction) => {
-                if (transaction.transactionType === 'P2P_SEND' || transaction.transactionType === 'P2P_RECEIVE') {
-                    let newP2P = {
+                if (transaction.metadata.relatedTransactionId === undefined || transaction.metadata.relatedTransactionId === null) {
+                    let newTransaction = {
+                        createdAt: transaction.transactionDate,
+                        updatedAt: transaction.transactionDate,
+                        transactionId: transaction.transactionId,
+                        authorizationCode: transaction.authorizationCode,
+                        status: transaction.transactionStatus,
+                        description: transaction.description,
                         transactionType: transaction.transactionType,
-                        transactionDate: transaction.transactionDate,
-                        transactionAmount: transaction.amount
+                        metadata: { deviceId: transaction.metadata.deviceId },
+                        timeline: [{
+                                createdAt: transaction.transactionDate,
+                                status: transaction.transactionStatus,
+                                amount: transaction.amount
+                            }]
                     };
-                    p2PArray.push(newP2P);
+                    rootTransactions.push(newTransaction);
+                }
+                else {
+                    nonRootTransactions.push(transaction);
                 }
             });
+            rootObj = { transactions: rootTransactions };
+            buildRoot(rootObj, nonRootTransactions, rootTransactions);
         }
         else {
             console.error('No transactions found');
         }
-        return p2PArray;
     });
 }
-function findP2PLink(allTransactions, p2PArray) {
+function buildRoot(rootObj, nonRootTransactions, rootTransactions) {
     return __awaiter(this, void 0, void 0, function* () {
-        let p2PLinkCustomers = [];
-        if (allTransactions && allTransactions.length > 0) {
-            let p2pLookFor;
-            allTransactions.forEach((transaction) => {
-                p2PArray.forEach((p2p) => {
-                    // not using ! in case data does not properly align (alternatively we can use regex)
-                    if (p2p.transactionType === 'P2P_SEND') {
-                        p2pLookFor = 'P2P_RECEIVE';
-                    }
-                    else if (p2p.transactionType === 'P2P_RECEIVE') {
-                        p2pLookFor = 'P2P_SEND';
-                    }
-                    if (transaction.transactionType === p2pLookFor && transaction.transactionDate === p2p.transactionDate && Math.abs(transaction.amount) === Math.abs(p2p.transactionAmount)) {
-                        let newP2PLinkCustomer = {
-                            relatedCustomerId: transaction.customerId,
-                            relationType: transaction.transactionType
-                        };
-                        p2PLinkCustomers.push(newP2PLinkCustomer);
+        let similarTransactions;
+        if (rootObj && rootObj.transactions && rootObj.transactions.length > 0 && nonRootTransactions.length > 0) {
+            rootObj.transactions.forEach((rootTransaction) => {
+                similarTransactions = [];
+                nonRootTransactions.forEach((nonRootTransaction) => {
+                    if (rootTransaction.authorizationCode === nonRootTransaction.authorizationCode) {
+                        similarTransactions.push(nonRootTransaction);
                     }
                 });
-            });
-        }
-        else {
-            console.error('No transactions data available');
-        }
-        return (p2PLinkCustomers);
-    });
-}
-function getDevices(filteredTransactions) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let deviceArray = [];
-        if (filteredTransactions.length > 0) {
-            filteredTransactions.forEach((transaction) => {
-                if (transaction.metadata.deviceId) { // seperated ifs for readability
-                    let deviceID = transaction.metadata.deviceId;
-                    if (!deviceArray.includes(deviceID)) {
-                        deviceArray.push(deviceID);
-                    }
+                if (similarTransactions.length > 0) {
+                    buildTimeLine(similarTransactions, rootTransaction);
                 }
             });
         }
         else {
-            console.error('No transactions found');
+            if (rootTransactions.length === 0) {
+                console.error('No root transactions found');
+            }
+            ;
+            if (nonRootTransactions.length === 0) {
+                console.error('No non-root transactions found');
+            }
+            ;
         }
-        return deviceArray;
+        sendOutput(rootObj);
     });
 }
-function findDeviceLink(allTransactions, deviceArray, exludeId) {
+function buildTimeLine(similarTransactions, rootTransaction) {
     return __awaiter(this, void 0, void 0, function* () {
-        let relatedIDs = [];
-        if (allTransactions && allTransactions.length > 0) {
-            allTransactions.forEach((transaction) => {
-                if (transaction.metadata.deviceId) { // seperated ifs for readability
-                    let deviceID = transaction.metadata.deviceId;
-                    if (deviceArray.includes(deviceID) && !relatedIDs.includes(transaction.customerId) && (exludeId !== transaction.customerId)) {
-                        relatedIDs.push(transaction.customerId);
-                    }
+        if (similarTransactions.length > 0) {
+            let latestReference = rootTransaction.transactionId;
+            similarTransactions.forEach((transaction) => {
+                var _a;
+                if (transaction.metadata.relatedTransactionId === latestReference) {
+                    let newTimeLine = {
+                        createdAt: transaction.transactionDate,
+                        status: transaction.transactionStatus,
+                        amount: transaction.amount
+                    };
+                    (_a = rootTransaction.timeline) === null || _a === void 0 ? void 0 : _a.push(newTimeLine);
+                    rootTransaction.updatedAt = transaction.transactionDate;
+                    rootTransaction.status = transaction.transactionStatus;
+                    latestReference = transaction.transactionId;
                 }
             });
         }
-        else {
-            console.error('No transactions data available');
-        }
-        return relatedIDs;
-    });
-}
-function buildRelatedCustomers(deviceLinkCustomers, transactionLinkCustomers) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let relatedCustomers;
-        let rootTransactions = [];
-        transactionLinkCustomers.forEach((transaction) => {
-            rootTransactions.push(transaction);
-        });
-        deviceLinkCustomers.forEach((customerLink) => {
-            let deviceLink = {
-                relatedCustomerId: customerLink,
-                relationType: 'DEVICE'
-            };
-            rootTransactions.push(deviceLink);
-        });
-        relatedCustomers = { relatedTransactions: rootTransactions };
-        return relatedCustomers;
     });
 }
 function sendOutput(rootObj) {
@@ -217,3 +192,5 @@ function sendOutput(rootObj) {
     console.log("output sent, check Postman. GET at http://localhost:3000");
 }
 startFilter();
+// TODO:
+//- clean up
