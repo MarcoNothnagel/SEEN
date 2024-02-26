@@ -1,14 +1,15 @@
 import express, {Application, Request, Response} from 'express';
 import axios from 'axios';
 import * as readline from 'readline';
-import * as Interfaces from './interfaces';
+import * as transactionInterfaces from './interfaces/transactionInterfaces';
+import * as api1Interfaces from './interfaces/api1Interfaces';
 
 const exp: Application = express();
 const port: number = 3000;
 
 
 async function fetchData() {
-    let transactions: Interfaces.Transaction[] = [];
+    let transactions: transactionInterfaces.Transaction[] = [];
     try {
         const response = await axios.get('https://cdn.seen.com/challenge/transactions-v2.json');
         transactions = response.data.map((item: any) => ({
@@ -42,7 +43,7 @@ async function startFilter() {
         output: process.stdout
     });
     let transactions = await fetchData();
-    let filteredTransactions: Interfaces.Transaction[] = [];
+    let filteredTransactions: transactionInterfaces.Transaction[] = [];
     rl.question('Enter the customer ID: ', (customerId: string) => {
         if (customerId != "0"){
             console.log(`Customer ID entered: ${customerId}`);
@@ -61,15 +62,15 @@ async function startFilter() {
 }   
 
 
-async function buildRootTransactions(filteredTransactions: Interfaces.Transaction[]) {
-    let nonRootTransactions: Interfaces.Transaction[] = [];
-    let rootTransactions: Interfaces.TransactionFin[] = [];
-    let rootObj: Interfaces.RootObject;
+async function buildRootTransactions(filteredTransactions: transactionInterfaces.Transaction[]) {
+    let nonRootTransactions: transactionInterfaces.Transaction[] = [];
+    let rootTransactions: api1Interfaces.TransactionFin[] = [];
+    let rootObj: api1Interfaces.RootObject;
 
     if (filteredTransactions.length > 0) {
         filteredTransactions.forEach((transaction) => {
             if (transaction.metadata.relatedTransactionId === undefined || transaction.metadata.relatedTransactionId === null) {
-                let newTransaction: Interfaces.TransactionFin = {
+                let newTransaction: api1Interfaces.TransactionFin = {
                     createdAt: transaction.transactionDate,
                     updatedAt: transaction.transactionDate,
                     transactionId: transaction.transactionId,
@@ -99,8 +100,8 @@ async function buildRootTransactions(filteredTransactions: Interfaces.Transactio
 }   
 
 
-async function buildRoot(rootObj: Interfaces.RootObject, nonRootTransactions: Interfaces.Transaction[], rootTransactions: Interfaces.TransactionFin[]) {
-    let similarTransactions: Interfaces.Transaction[];
+async function buildRoot(rootObj: api1Interfaces.RootObject, nonRootTransactions: transactionInterfaces.Transaction[], rootTransactions: api1Interfaces.TransactionFin[]) {
+    let similarTransactions: transactionInterfaces.Transaction[];
 
     if (rootObj && rootObj.transactions && rootObj.transactions.length > 0 && nonRootTransactions.length > 0) {
         rootObj.transactions.forEach((rootTransaction) => {
@@ -128,12 +129,12 @@ async function buildRoot(rootObj: Interfaces.RootObject, nonRootTransactions: In
 
 }
 
-async function buildTimeLine(similarTransactions: Interfaces.Transaction[], rootTransaction: Interfaces.TransactionFin) {
+async function buildTimeLine(similarTransactions: transactionInterfaces.Transaction[], rootTransaction: api1Interfaces.TransactionFin) {
     if (similarTransactions.length > 0) {
         let latestReference: number | undefined = rootTransaction.transactionId;
         similarTransactions.forEach((transaction) => {
             if (transaction.metadata.relatedTransactionId === latestReference) {
-                let newTimeLine: Interfaces.Timeline = {
+                let newTimeLine: api1Interfaces.Timeline = {
                     createdAt: transaction.transactionDate,
                     status: transaction.transactionStatus,
                     amount: transaction.amount
@@ -149,7 +150,7 @@ async function buildTimeLine(similarTransactions: Interfaces.Transaction[], root
 }
 
 
-function sendOutput(rootObj: Interfaces.RootObject): void {
+function sendOutput(rootObj: api1Interfaces.RootObject): void {
     exp.get('/', (req: Request, res: Response) => {
         if (rootObj) {
             res.json(rootObj);

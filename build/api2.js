@@ -38,182 +38,188 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const axios_1 = __importDefault(require("axios"));
 const readline = __importStar(require("readline"));
-const exp = (0, express_1.default)();
-const port = 3000;
-function fetchData() {
-    return __awaiter(this, void 0, void 0, function* () {
-        let transactions = [];
-        try {
-            const response = yield axios_1.default.get('https://cdn.seen.com/challenge/transactions-v2.json');
-            transactions = response.data.map((item) => ({
-                transactionId: item.transactionId,
-                authorizationCode: item.authorizationCode,
-                transactionDate: item.transactionDate,
-                customerId: item.customerId,
-                transactionType: item.transactionType,
-                transactionStatus: item.transactionStatus,
-                description: item.description,
-                amount: Number(item.amount).toFixed(2),
-                metadata: item.metadata
-            }));
-            return (transactions);
-        }
-        catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    });
-}
-// filter by console input
-function startFilter() {
-    return __awaiter(this, void 0, void 0, function* () {
-        exp.listen(port, () => {
-            console.log(`Connected successfully on port ${port}`);
-        });
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-        let transactions = yield fetchData();
-        let filteredTransactions = [];
-        rl.question('Enter the customer ID: ', (customerId) => __awaiter(this, void 0, void 0, function* () {
-            if (customerId != "0") {
-                console.log(`Customer ID entered: ${customerId}`);
-                if (transactions && transactions.length > 0) {
-                    filteredTransactions = transactions.filter((transaction) => transaction.customerId === parseInt(customerId));
-                    let deviceArray = yield getDevices(filteredTransactions);
-                    let deviceLinkCustomers = yield findDeviceLink(transactions, deviceArray, parseInt(customerId));
-                    let p2PArray = yield getP2PTransactions(filteredTransactions);
-                    let transactionLinkCustomers = yield findP2PLink(transactions, p2PArray);
-                    let finalOutput = yield buildRelatedCustomers(deviceLinkCustomers, transactionLinkCustomers);
-                    sendOutput(finalOutput);
+class Main {
+    constructor(port) {
+        this.exp = (0, express_1.default)();
+        this.port = port;
+    }
+    start() {
+        return __awaiter(this, void 0, void 0, function* () {
+            exp.listen(port, () => {
+                console.log(`Connected successfully on port ${port}`);
+            });
+            const rl = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+            let transactions = yield this.fetchData();
+            let filteredTransactions = [];
+            rl.question('Enter the customer ID: ', (customerId) => __awaiter(this, void 0, void 0, function* () {
+                if (customerId != "0") {
+                    console.log(`Customer ID entered: ${customerId}`);
+                    if (transactions && transactions.length > 0) {
+                        filteredTransactions = transactions.filter((transaction) => transaction.customerId === parseInt(customerId));
+                        let deviceArray = yield this.getDevices(filteredTransactions);
+                        let deviceLinkCustomers = yield this.findDeviceLink(transactions, deviceArray, parseInt(customerId));
+                        let p2PArray = yield this.getP2PTransactions(filteredTransactions);
+                        let transactionLinkCustomers = yield this.findP2PLink(transactions, p2PArray);
+                        let finalOutput = yield this.buildRelatedCustomers(deviceLinkCustomers, transactionLinkCustomers);
+                        this.sendOutput(finalOutput);
+                    }
+                    else {
+                        console.error('No transactions data available');
+                    }
                 }
                 else {
-                    console.error('No transactions data available');
+                    process.exit();
                 }
+                rl.close();
+            }));
+        });
+    }
+    fetchData() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let transactions = [];
+            try {
+                const response = yield axios_1.default.get('https://cdn.seen.com/challenge/transactions-v2.json');
+                transactions = response.data.map((item) => ({
+                    transactionId: item.transactionId,
+                    authorizationCode: item.authorizationCode,
+                    transactionDate: item.transactionDate,
+                    customerId: item.customerId,
+                    transactionType: item.transactionType,
+                    transactionStatus: item.transactionStatus,
+                    description: item.description,
+                    amount: Number(item.amount).toFixed(2),
+                    metadata: item.metadata
+                }));
+                return (transactions);
             }
-            else {
-                process.exit();
+            catch (error) {
+                console.error('Error fetching data:', error);
             }
-            rl.close();
-        }));
-    });
-}
-function getP2PTransactions(filteredTransactions) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let p2PArray = [];
-        if (filteredTransactions.length > 0) {
-            filteredTransactions.forEach((transaction) => {
-                if (transaction.transactionType === 'P2P_SEND' || transaction.transactionType === 'P2P_RECEIVE') {
-                    let newP2P = {
-                        transactionType: transaction.transactionType,
-                        transactionDate: transaction.transactionDate,
-                        transactionAmount: transaction.amount
-                    };
-                    p2PArray.push(newP2P);
-                }
-            });
-        }
-        else {
-            console.error('No transactions found');
-        }
-        return p2PArray;
-    });
-}
-function findP2PLink(allTransactions, p2PArray) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let p2PLinkCustomers = [];
-        if (allTransactions && allTransactions.length > 0) {
-            let p2pLookFor;
-            allTransactions.forEach((transaction) => {
-                p2PArray.forEach((p2p) => {
-                    // not using ! in case data does not properly align (alternatively we can use regex)
-                    if (p2p.transactionType === 'P2P_SEND') {
-                        p2pLookFor = 'P2P_RECEIVE';
-                    }
-                    else if (p2p.transactionType === 'P2P_RECEIVE') {
-                        p2pLookFor = 'P2P_SEND';
-                    }
-                    if (transaction.transactionType === p2pLookFor && transaction.transactionDate === p2p.transactionDate && Math.abs(transaction.amount) === Math.abs(p2p.transactionAmount)) {
-                        let newP2PLinkCustomer = {
-                            relatedCustomerId: transaction.customerId,
-                            relationType: transaction.transactionType
+        });
+    }
+    getP2PTransactions(filteredTransactions) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let p2PArray = [];
+            if (filteredTransactions.length > 0) {
+                filteredTransactions.forEach((transaction) => {
+                    if (transaction.transactionType === 'P2P_SEND' || transaction.transactionType === 'P2P_RECEIVE') {
+                        let newP2P = {
+                            transactionType: transaction.transactionType,
+                            transactionDate: transaction.transactionDate,
+                            transactionAmount: transaction.amount
                         };
-                        p2PLinkCustomers.push(newP2PLinkCustomer);
+                        p2PArray.push(newP2P);
                     }
                 });
-            });
-        }
-        else {
-            console.error('No transactions data available');
-        }
-        return (p2PLinkCustomers);
-    });
-}
-function getDevices(filteredTransactions) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let deviceArray = [];
-        if (filteredTransactions.length > 0) {
-            filteredTransactions.forEach((transaction) => {
-                if (transaction.metadata.deviceId) { // seperated ifs for readability
-                    let deviceID = transaction.metadata.deviceId;
-                    if (!deviceArray.includes(deviceID)) {
-                        deviceArray.push(deviceID);
-                    }
-                }
-            });
-        }
-        else {
-            console.error('No transactions found');
-        }
-        return deviceArray;
-    });
-}
-function findDeviceLink(allTransactions, deviceArray, exludeId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let relatedIDs = [];
-        if (allTransactions && allTransactions.length > 0) {
-            allTransactions.forEach((transaction) => {
-                if (transaction.metadata.deviceId) { // seperated ifs for readability
-                    let deviceID = transaction.metadata.deviceId;
-                    if (deviceArray.includes(deviceID) && !relatedIDs.includes(transaction.customerId) && (exludeId !== transaction.customerId)) {
-                        relatedIDs.push(transaction.customerId);
-                    }
-                }
-            });
-        }
-        else {
-            console.error('No transactions data available');
-        }
-        return relatedIDs;
-    });
-}
-function buildRelatedCustomers(deviceLinkCustomers, transactionLinkCustomers) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let relatedCustomers;
-        let rootTransactions = [];
-        transactionLinkCustomers.forEach((transaction) => {
-            rootTransactions.push(transaction);
+            }
+            else {
+                console.error('No transactions found');
+            }
+            return p2PArray;
         });
-        deviceLinkCustomers.forEach((customerLink) => {
-            let deviceLink = {
-                relatedCustomerId: customerLink,
-                relationType: 'DEVICE'
-            };
-            rootTransactions.push(deviceLink);
+    }
+    findP2PLink(allTransactions, p2PArray) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let p2PLinkCustomers = [];
+            if (allTransactions && allTransactions.length > 0) {
+                let p2pLookFor;
+                allTransactions.forEach((transaction) => {
+                    p2PArray.forEach((p2p) => {
+                        // not using ! in case data does not properly align (alternatively we can use regex)
+                        if (p2p.transactionType === 'P2P_SEND') {
+                            p2pLookFor = 'P2P_RECEIVE';
+                        }
+                        else if (p2p.transactionType === 'P2P_RECEIVE') {
+                            p2pLookFor = 'P2P_SEND';
+                        }
+                        if (transaction.transactionType === p2pLookFor && transaction.transactionDate === p2p.transactionDate && Math.abs(transaction.amount) === Math.abs(p2p.transactionAmount)) {
+                            let newP2PLinkCustomer = {
+                                relatedCustomerId: transaction.customerId,
+                                relationType: transaction.transactionType
+                            };
+                            p2PLinkCustomers.push(newP2PLinkCustomer);
+                        }
+                    });
+                });
+            }
+            else {
+                console.error('No transactions data available');
+            }
+            return (p2PLinkCustomers);
         });
-        relatedCustomers = { relatedTransactions: rootTransactions };
-        return relatedCustomers;
-    });
+    }
+    getDevices(filteredTransactions) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let deviceArray = [];
+            if (filteredTransactions.length > 0) {
+                filteredTransactions.forEach((transaction) => {
+                    if (transaction.metadata.deviceId) { // seperated ifs for readability
+                        let deviceID = transaction.metadata.deviceId;
+                        if (!deviceArray.includes(deviceID)) {
+                            deviceArray.push(deviceID);
+                        }
+                    }
+                });
+            }
+            else {
+                console.error('No transactions found');
+            }
+            return deviceArray;
+        });
+    }
+    findDeviceLink(allTransactions, deviceArray, exludeId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let relatedIDs = [];
+            if (allTransactions && allTransactions.length > 0) {
+                allTransactions.forEach((transaction) => {
+                    if (transaction.metadata.deviceId) { // seperated ifs for readability
+                        let deviceID = transaction.metadata.deviceId;
+                        if (deviceArray.includes(deviceID) && !relatedIDs.includes(transaction.customerId) && (exludeId !== transaction.customerId)) {
+                            relatedIDs.push(transaction.customerId);
+                        }
+                    }
+                });
+            }
+            else {
+                console.error('No transactions data available');
+            }
+            return relatedIDs;
+        });
+    }
+    buildRelatedCustomers(deviceLinkCustomers, transactionLinkCustomers) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let relatedCustomers;
+            let rootTransactions = [];
+            transactionLinkCustomers.forEach((transaction) => {
+                rootTransactions.push(transaction);
+            });
+            deviceLinkCustomers.forEach((customerLink) => {
+                let deviceLink = {
+                    relatedCustomerId: customerLink,
+                    relationType: 'DEVICE'
+                };
+                rootTransactions.push(deviceLink);
+            });
+            relatedCustomers = { relatedTransactions: rootTransactions };
+            return relatedCustomers;
+        });
+    }
+    sendOutput(rootObj) {
+        exp.get('/', (req, res) => {
+            if (rootObj) {
+                res.json(rootObj);
+            }
+            else {
+                res.status(500).json({ error: 'Data not fetched yet' });
+            }
+        });
+        console.log("output sent, check Postman. GET at http://localhost:3000");
+    }
 }
-function sendOutput(rootObj) {
-    exp.get('/', (req, res) => {
-        if (rootObj) {
-            res.json(rootObj);
-        }
-        else {
-            res.status(500).json({ error: 'Data not fetched yet' });
-        }
-    });
-    console.log("output sent, check Postman. GET at http://localhost:3000");
-}
-startFilter();
+const exp = (0, express_1.default)();
+const port = 3000;
+const main = new Main(port);
+main.start();
