@@ -1,0 +1,14 @@
+export interface P2PData {
+  transactionDate: string;
+  transactionType: string;
+  transactionAmount: number;
+}
+
+export interface RelatedCustomer {
+  relatedCustomerId: number;
+  relationType: string;
+}
+
+export interface RootObject {
+  relatedTransactions: RelatedCustomer[];
+}
