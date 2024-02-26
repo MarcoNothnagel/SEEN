@@ -35,9 +35,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Main = void 0;
 const express_1 = __importDefault(require("express"));
-const axios_1 = __importDefault(require("axios"));
 const readline = __importStar(require("readline"));
+const sendOutput_1 = require("./sendOutput");
+const fetchData_1 = require("./fetchData");
 class Main {
     constructor(port) {
         this.exp = (0, express_1.default)();
@@ -45,14 +47,14 @@ class Main {
     }
     start() {
         return __awaiter(this, void 0, void 0, function* () {
-            exp.listen(port, () => {
-                console.log(`Connected successfully on port ${port}`);
+            this.exp.listen(this.port, () => {
+                console.log(`Connected successfully on port ${this.port}`);
             });
             const rl = readline.createInterface({
                 input: process.stdin,
                 output: process.stdout
             });
-            let transactions = yield this.fetchData();
+            let transactions = yield (0, fetchData_1.fetchData)();
             let filteredTransactions = [];
             rl.question('Enter the customer ID: ', (customerId) => __awaiter(this, void 0, void 0, function* () {
                 if (customerId != "0") {
@@ -64,7 +66,7 @@ class Main {
                         let p2PArray = yield this.getP2PTransactions(filteredTransactions);
                         let transactionLinkCustomers = yield this.findP2PLink(transactions, p2PArray);
                         let finalOutput = yield this.buildRelatedCustomers(deviceLinkCustomers, transactionLinkCustomers);
-                        this.sendOutput(finalOutput);
+                        (0, sendOutput_1.sendOutput)(finalOutput, this.exp);
                     }
                     else {
                         console.error('No transactions data available');
@@ -75,29 +77,6 @@ class Main {
                 }
                 rl.close();
             }));
-        });
-    }
-    fetchData() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let transactions = [];
-            try {
-                const response = yield axios_1.default.get('https://cdn.seen.com/challenge/transactions-v2.json');
-                transactions = response.data.map((item) => ({
-                    transactionId: item.transactionId,
-                    authorizationCode: item.authorizationCode,
-                    transactionDate: item.transactionDate,
-                    customerId: item.customerId,
-                    transactionType: item.transactionType,
-                    transactionStatus: item.transactionStatus,
-                    description: item.description,
-                    amount: Number(item.amount).toFixed(2),
-                    metadata: item.metadata
-                }));
-                return (transactions);
-            }
-            catch (error) {
-                console.error('Error fetching data:', error);
-            }
         });
     }
     getP2PTransactions(filteredTransactions) {
@@ -207,19 +186,5 @@ class Main {
             return relatedCustomers;
         });
     }
-    sendOutput(rootObj) {
-        exp.get('/', (req, res) => {
-            if (rootObj) {
-                res.json(rootObj);
-            }
-            else {
-                res.status(500).json({ error: 'Data not fetched yet' });
-            }
-        });
-        console.log("output sent, check Postman. GET at http://localhost:3000");
-    }
 }
-const exp = (0, express_1.default)();
-const port = 3000;
-const main = new Main(port);
-main.start();
+exports.Main = Main;

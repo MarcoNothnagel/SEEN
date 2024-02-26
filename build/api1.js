@@ -35,162 +35,137 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Main = void 0;
 const express_1 = __importDefault(require("express"));
-const axios_1 = __importDefault(require("axios"));
 const readline = __importStar(require("readline"));
-const exp = (0, express_1.default)();
-const port = 3000;
-function fetchData() {
-    return __awaiter(this, void 0, void 0, function* () {
-        let transactions = [];
-        try {
-            const response = yield axios_1.default.get('https://cdn.seen.com/challenge/transactions-v2.json');
-            transactions = response.data.map((item) => ({
-                transactionId: item.transactionId,
-                authorizationCode: item.authorizationCode,
-                transactionDate: item.transactionDate,
-                customerId: item.customerId,
-                transactionType: item.transactionType,
-                transactionStatus: item.transactionStatus,
-                description: item.description,
-                amount: Number(item.amount).toFixed(2),
-                metadata: item.metadata
-            }));
-            return (transactions);
-        }
-        catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    });
-}
-// filter by console input
-function startFilter() {
-    return __awaiter(this, void 0, void 0, function* () {
-        exp.listen(port, () => {
-            console.log(`Connected successfully on port ${port}`);
-        });
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-        let transactions = yield fetchData();
-        let filteredTransactions = [];
-        rl.question('Enter the customer ID: ', (customerId) => {
-            if (customerId != "0") {
-                console.log(`Customer ID entered: ${customerId}`);
-                if (transactions && transactions.length > 0) {
-                    filteredTransactions = transactions.filter((transaction) => transaction.customerId === parseInt(customerId));
-                    buildRootTransactions(filteredTransactions);
-                }
-                else {
-                    console.error('No transactions data available');
-                }
-            }
-            else {
-                process.exit();
-            }
-            rl.close();
-        });
-    });
-}
-function buildRootTransactions(filteredTransactions) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let nonRootTransactions = [];
-        let rootTransactions = [];
-        let rootObj;
-        if (filteredTransactions.length > 0) {
-            filteredTransactions.forEach((transaction) => {
-                if (transaction.metadata.relatedTransactionId === undefined || transaction.metadata.relatedTransactionId === null) {
-                    let newTransaction = {
-                        createdAt: transaction.transactionDate,
-                        updatedAt: transaction.transactionDate,
-                        transactionId: transaction.transactionId,
-                        authorizationCode: transaction.authorizationCode,
-                        status: transaction.transactionStatus,
-                        description: transaction.description,
-                        transactionType: transaction.transactionType,
-                        metadata: { deviceId: transaction.metadata.deviceId },
-                        timeline: [{
-                                createdAt: transaction.transactionDate,
-                                status: transaction.transactionStatus,
-                                amount: transaction.amount
-                            }]
-                    };
-                    rootTransactions.push(newTransaction);
-                }
-                else {
-                    nonRootTransactions.push(transaction);
-                }
+const sendOutput_1 = require("./sendOutput");
+const fetchData_1 = require("./fetchData");
+class Main {
+    constructor(port) {
+        this.exp = (0, express_1.default)();
+        this.port = port;
+    }
+    start() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.exp.listen(this.port, () => {
+                console.log(`Connected successfully on port ${this.port}`);
             });
-            rootObj = { transactions: rootTransactions };
-            buildRoot(rootObj, nonRootTransactions, rootTransactions);
-        }
-        else {
-            console.error('No transactions found');
-        }
-    });
-}
-function buildRoot(rootObj, nonRootTransactions, rootTransactions) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let similarTransactions;
-        if (rootObj && rootObj.transactions && rootObj.transactions.length > 0 && nonRootTransactions.length > 0) {
-            rootObj.transactions.forEach((rootTransaction) => {
-                similarTransactions = [];
-                nonRootTransactions.forEach((nonRootTransaction) => {
-                    if (rootTransaction.authorizationCode === nonRootTransaction.authorizationCode) {
-                        similarTransactions.push(nonRootTransaction);
+            const rl = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+            let transactions = yield (0, fetchData_1.fetchData)();
+            let filteredTransactions = [];
+            rl.question('Enter the customer ID: ', (customerId) => __awaiter(this, void 0, void 0, function* () {
+                if (customerId != "0") {
+                    console.log(`Customer ID entered: ${customerId}`);
+                    if (transactions && transactions.length > 0) {
+                        filteredTransactions = transactions.filter((transaction) => transaction.customerId === parseInt(customerId));
+                        let rootObj;
+                        let rootTransactions;
+                        let nonRootTransactions;
+                        [rootObj, rootTransactions, nonRootTransactions] = yield this.buildRootTransactions(filteredTransactions);
+                        let finalOutput = yield this.buildRoot(rootObj, nonRootTransactions, rootTransactions);
+                        console.log(JSON.stringify(finalOutput, null, 2));
+                        (0, sendOutput_1.sendOutput)(finalOutput, this.exp);
+                    }
+                    else {
+                        console.error('No transactions data available');
+                    }
+                }
+                else {
+                    process.exit();
+                }
+                rl.close();
+            }));
+        });
+    }
+    buildRootTransactions(filteredTransactions) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let rootObj = { transactions: [] };
+            let rootTransactions = [];
+            let nonRootTransactions = [];
+            if (filteredTransactions.length > 0) {
+                filteredTransactions.forEach((transaction) => {
+                    if (transaction.metadata.relatedTransactionId === undefined || transaction.metadata.relatedTransactionId === null) {
+                        let newTransaction = {
+                            createdAt: transaction.transactionDate,
+                            updatedAt: transaction.transactionDate,
+                            transactionId: transaction.transactionId,
+                            authorizationCode: transaction.authorizationCode,
+                            status: transaction.transactionStatus,
+                            description: transaction.description,
+                            transactionType: transaction.transactionType,
+                            metadata: { deviceId: transaction.metadata.deviceId },
+                            timeline: [{
+                                    createdAt: transaction.transactionDate,
+                                    status: transaction.transactionStatus,
+                                    amount: transaction.amount
+                                }]
+                        };
+                        rootTransactions.push(newTransaction);
+                    }
+                    else {
+                        nonRootTransactions.push(transaction);
                     }
                 });
-                if (similarTransactions.length > 0) {
-                    buildTimeLine(similarTransactions, rootTransaction);
-                }
-            });
-        }
-        else {
-            if (rootTransactions.length === 0) {
-                console.error('No root transactions found');
+                rootObj = { transactions: rootTransactions };
             }
-            ;
-            if (nonRootTransactions.length === 0) {
-                console.error('No non-root transactions found');
+            else {
+                console.error('No transactions found');
             }
-            ;
-        }
-        sendOutput(rootObj);
-    });
-}
-function buildTimeLine(similarTransactions, rootTransaction) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (similarTransactions.length > 0) {
-            let latestReference = rootTransaction.transactionId;
-            similarTransactions.forEach((transaction) => {
-                var _a;
-                if (transaction.metadata.relatedTransactionId === latestReference) {
-                    let newTimeLine = {
-                        createdAt: transaction.transactionDate,
-                        status: transaction.transactionStatus,
-                        amount: transaction.amount
-                    };
-                    (_a = rootTransaction.timeline) === null || _a === void 0 ? void 0 : _a.push(newTimeLine);
-                    rootTransaction.updatedAt = transaction.transactionDate;
-                    rootTransaction.status = transaction.transactionStatus;
-                    latestReference = transaction.transactionId;
+            return [rootObj, rootTransactions, nonRootTransactions];
+        });
+    }
+    buildRoot(rootObj, nonRootTransactions, rootTransactions) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let similarTransactions;
+            if (rootObj && rootObj.transactions && rootObj.transactions.length > 0 && nonRootTransactions.length > 0) {
+                rootObj.transactions.forEach((rootTransaction) => __awaiter(this, void 0, void 0, function* () {
+                    similarTransactions = [];
+                    nonRootTransactions.forEach((nonRootTransaction) => {
+                        if (rootTransaction.authorizationCode === nonRootTransaction.authorizationCode) {
+                            similarTransactions.push(nonRootTransaction);
+                        }
+                    });
+                    if (similarTransactions.length > 0) {
+                        yield this.buildTimeLine(similarTransactions, rootTransaction);
+                    }
+                }));
+            }
+            else {
+                if (rootTransactions.length === 0) {
+                    console.error('No root transactions found');
                 }
-            });
-        }
-    });
+                ;
+                if (nonRootTransactions.length === 0) {
+                    console.error('No non-root transactions found');
+                }
+                ;
+            }
+            return (rootObj);
+        });
+    }
+    buildTimeLine(similarTransactions, rootTransaction) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (similarTransactions.length > 0) {
+                let latestReference = rootTransaction.transactionId;
+                similarTransactions.forEach((transaction) => {
+                    var _a;
+                    if (transaction.metadata.relatedTransactionId === latestReference) {
+                        let newTimeLine = {
+                            createdAt: transaction.transactionDate,
+                            status: transaction.transactionStatus,
+                            amount: transaction.amount
+                        };
+                        (_a = rootTransaction.timeline) === null || _a === void 0 ? void 0 : _a.push(newTimeLine);
+                        rootTransaction.updatedAt = transaction.transactionDate;
+                        rootTransaction.status = transaction.transactionStatus;
+                        latestReference = transaction.transactionId;
+                    }
+                });
+            }
+        });
+    }
 }
-function sendOutput(rootObj) {
-    exp.get('/', (req, res) => {
-        if (rootObj) {
-            res.json(rootObj);
-        }
-        else {
-            res.status(500).json({ error: 'Data not fetched yet' });
-        }
-    });
-    console.log("output sent, check Postman. GET at http://localhost:3000");
-}
-startFilter();
-// TODO:
-//- clean up
+exports.Main = Main;

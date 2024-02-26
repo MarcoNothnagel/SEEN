@@ -1,11 +1,12 @@
 import express, {Application, Request, Response} from 'express';
-import axios from 'axios';
 import * as readline from 'readline';
 import * as transactionInterfaces from './interfaces/transactionInterfaces';
 import * as api2Interfaces from './interfaces/api2Interfaces';
+import { sendOutput } from './sendOutput';
+import { fetchData } from './fetchData';
 
 
-class Main {
+export class Main {
     private exp: Application;
     private port: number;
 
@@ -15,14 +16,14 @@ class Main {
     }
 
     async start() {
-        exp.listen(port, ()=> {
-            console.log(`Connected successfully on port ${port}`);
+        this.exp.listen(this.port, ()=> {
+            console.log(`Connected successfully on port ${this.port}`);
         });
         const rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout
         });
-        let transactions = await this.fetchData();
+        let transactions = await fetchData();
         let filteredTransactions: transactionInterfaces.Transaction[] = [];
         rl.question('Enter the customer ID: ', async (customerId: string) => {
             if (customerId != "0"){
@@ -37,7 +38,7 @@ class Main {
                     let transactionLinkCustomers: api2Interfaces.RelatedCustomer[] = await this.findP2PLink(transactions, p2PArray);
 
                     let finalOutput: api2Interfaces.RootObject = await this.buildRelatedCustomers(deviceLinkCustomers, transactionLinkCustomers);
-                    this.sendOutput(finalOutput);
+                    sendOutput(finalOutput, this.exp);
 
                 } else {
                     console.error('No transactions data available');
@@ -48,30 +49,7 @@ class Main {
             rl.close();
 
         });
-    }   
-
-    private async fetchData() {
-        let transactions: transactionInterfaces.Transaction[] = [];
-        try {
-            const response = await axios.get('https://cdn.seen.com/challenge/transactions-v2.json');
-            transactions = response.data.map((item: any) => ({
-                transactionId: item.transactionId,
-                authorizationCode: item.authorizationCode,
-                transactionDate: item.transactionDate,
-                customerId: item.customerId,
-                transactionType: item.transactionType,
-                transactionStatus: item.transactionStatus,
-                description: item.description,
-                amount: Number(item.amount).toFixed(2),
-                metadata: item.metadata
-            }));
-
-            return(transactions);
-
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    }
+    }  
 
 
     private async getP2PTransactions(filteredTransactions: transactionInterfaces.Transaction[]) {
@@ -188,27 +166,4 @@ class Main {
         return relatedCustomers;
     }
 
-
-
-
-    private sendOutput(rootObj: api2Interfaces.RootObject): void {
-        exp.get('/', (req: Request, res: Response) => {
-            if (rootObj) {
-                res.json(rootObj);
-            } else {
-                res.status(500).json({ error: 'Data not fetched yet' });
-            }
-        });
-        console.log("output sent, check Postman. GET at http://localhost:3000");
-    }
-
 }
-
-
-
-const exp: Application = express();
-const port: number = 3000;
-
-const main = new Main(port);
-main.start();
-
