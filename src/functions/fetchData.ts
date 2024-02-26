@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as transactionInterfaces from './interfaces/transactionInterfaces';
+import * as transactionInterfaces from '../interfaces/transactionInterfaces';
 
 export async function fetchData() {
     let transactions: transactionInterfaces.Transaction[] = [];

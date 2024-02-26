@@ -2,8 +2,8 @@ import express, {Application, Request, Response} from 'express';
 import * as readline from 'readline';
 import * as transactionInterfaces from './interfaces/transactionInterfaces';
 import * as api2Interfaces from './interfaces/api2Interfaces';
-import { sendOutput } from './sendOutput';
-import { fetchData } from './fetchData';
+import { sendOutput } from './functions/sendOutput';
+import { fetchData } from './functions/fetchData';
 
 
 export class Main {
