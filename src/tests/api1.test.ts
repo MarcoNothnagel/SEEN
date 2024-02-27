@@ -1,8 +1,8 @@
 import { Main } from '../api1';
 import * as transactionInterfaces from '../interfaces/transactionInterfaces';
 import * as api1Interfaces from '../interfaces/api1Interfaces';
-import { sendOutput } from '../functions/sendOutput';
-import { fetchData } from '../functions/fetchData';
+// import { sendOutput } from '../functions/sendOutput';
+// import { fetchData } from '../functions/fetchData';
 
 const main = new Main(3000);
 
@@ -10,8 +10,6 @@ describe('Main', () => {
 
     // tests for start()
     // TODO. struggling with getting the mock functions to work
-
-    
 
     // tests for buildRootTransactions()
 

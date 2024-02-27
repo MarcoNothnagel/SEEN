@@ -44,7 +44,7 @@ export class Main {
     }  
 
 
-    private async getP2PTransactions(filteredTransactions: transactionInterfaces.Transaction[]) {
+    public async getP2PTransactions(filteredTransactions: transactionInterfaces.Transaction[]) {
         let p2PArray: api2Interfaces.P2PData[] = [];
         if (filteredTransactions.length > 0) {
             filteredTransactions.forEach((transaction) => {
@@ -58,15 +58,13 @@ export class Main {
                 }
             });
 
-        } else {
-            console.error('No transactions found');
         }
 
         return p2PArray;
     }
 
 
-    private async findP2PLink(allTransactions: transactionInterfaces.Transaction[], p2PArray: api2Interfaces.P2PData[]) {
+    public async findP2PLink(allTransactions: transactionInterfaces.Transaction[], p2PArray: api2Interfaces.P2PData[]) {
         let p2PLinkCustomers: api2Interfaces.RelatedCustomer[] = [];
         if (allTransactions && allTransactions.length > 0) {
             let p2pLookFor: string;
@@ -89,16 +87,13 @@ export class Main {
                     }
                 });
             });
-        } else {
-            console.error('No transactions data available');
         }
 
-        return(p2PLinkCustomers);
-
+        return p2PLinkCustomers;
     }
 
 
-    private async getDevices(filteredTransactions: transactionInterfaces.Transaction[]) {
+    public async getDevices(filteredTransactions: transactionInterfaces.Transaction[]) {
         let deviceArray: string[] = [];
         if (filteredTransactions.length > 0) {
             filteredTransactions.forEach((transaction) => {
@@ -110,15 +105,13 @@ export class Main {
                 }
             });
 
-        } else {
-            console.error('No transactions found');
         }
 
         return deviceArray;
     }
 
 
-    private async findDeviceLink(allTransactions: transactionInterfaces.Transaction[], deviceArray: string[], exludeId: number) {
+    public async findDeviceLink(allTransactions: transactionInterfaces.Transaction[], deviceArray: string[], exludeId: number) {
         let relatedIDs: number[] = [];
         if (allTransactions && allTransactions.length > 0) {
             allTransactions.forEach((transaction) => {
@@ -131,15 +124,13 @@ export class Main {
                 }
             });
 
-        } else {
-            console.error('No transactions data available');
         }
 
         return relatedIDs;
     }
 
 
-    private async buildRelatedCustomers(deviceLinkCustomers: number[], transactionLinkCustomers: api2Interfaces.RelatedCustomer[]) {
+    public async buildRelatedCustomers(deviceLinkCustomers: number[], transactionLinkCustomers: api2Interfaces.RelatedCustomer[]) {
         let relatedCustomers: api2Interfaces.RootObject;
         let rootTransactions: api2Interfaces.RelatedCustomer[] = [];
         transactionLinkCustomers.forEach((transaction) => {

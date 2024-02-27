@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1709066748119" clover="3.2.0">
-  <project timestamp="1709066748120" name="All files">
-    <metrics statements="175" coveredstatements="108" conditionals="115" coveredconditionals="70" methods="57" coveredmethods="26" elements="347" coveredelements="204" complexity="0" loc="175" ncloc="175" packages="4" files="6" classes="6"/>
+<coverage generated="1709070999847" clover="3.2.0">
+  <project timestamp="1709070999847" name="All files">
+    <metrics statements="330" coveredstatements="163" conditionals="213" coveredconditionals="102" methods="105" coveredmethods="44" elements="648" coveredelements="309" complexity="0" loc="330" ncloc="330" packages="4" files="8" classes="8"/>
     <package name="build">
-      <metrics statements="73" coveredstatements="52" conditionals="56" coveredconditionals="39" methods="25" coveredmethods="16"/>
+      <metrics statements="159" coveredstatements="84" conditionals="118" coveredconditionals="63" methods="56" coveredmethods="28"/>
       <file name="api1.js" path="C:\Users\mnoth\OneDrive\Seen\build\api1.js">
         <metrics statements="73" coveredstatements="52" conditionals="56" coveredconditionals="39" methods="25" coveredmethods="16"/>
         <line num="2" count="1" type="cond" truecount="3" falsecount="0"/>
@@ -80,23 +80,112 @@
         <line num="145" count="1" type="stmt"/>
         <line num="152" count="0" type="cond" truecount="0" falsecount="2"/>
       </file>
+      <file name="api2.js" path="C:\Users\mnoth\OneDrive\Seen\build\api2.js">
+        <metrics statements="86" coveredstatements="32" conditionals="62" coveredconditionals="24" methods="31" coveredmethods="12"/>
+        <line num="2" count="1" type="cond" truecount="3" falsecount="0"/>
+        <line num="3" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="4" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="5" count="0" type="stmt"/>
+        <line num="6" count="0" type="stmt"/>
+        <line num="7" count="5" type="cond" truecount="1" falsecount="1"/>
+        <line num="8" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="11" count="1" type="cond" truecount="3" falsecount="0"/>
+        <line num="12" count="1" type="cond" truecount="3" falsecount="1"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="21" count="1" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="25" count="0" type="stmt"/>
+        <line num="26" count="0" type="stmt"/>
+        <line num="27" count="0" type="stmt"/>
+        <line num="29" count="0" type="stmt"/>
+        <line num="30" count="0" type="stmt"/>
+        <line num="31" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="32" count="0" type="stmt"/>
+        <line num="33" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="34" count="0" type="stmt"/>
+        <line num="35" count="0" type="stmt"/>
+        <line num="36" count="0" type="stmt"/>
+        <line num="37" count="0" type="stmt"/>
+        <line num="38" count="0" type="stmt"/>
+        <line num="39" count="0" type="stmt"/>
+        <line num="40" count="0" type="stmt"/>
+        <line num="43" count="0" type="stmt"/>
+        <line num="47" count="0" type="stmt"/>
+        <line num="52" count="0" type="stmt"/>
+        <line num="53" count="0" type="stmt"/>
+        <line num="54" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="55" count="0" type="stmt"/>
+        <line num="56" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="57" count="0" type="stmt"/>
+        <line num="62" count="0" type="stmt"/>
+        <line num="67" count="0" type="stmt"/>
+        <line num="69" count="0" type="stmt"/>
+        <line num="73" count="0" type="stmt"/>
+        <line num="74" count="0" type="stmt"/>
+        <line num="75" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="77" count="0" type="stmt"/>
+        <line num="78" count="0" type="stmt"/>
+        <line num="80" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="81" count="0" type="stmt"/>
+        <line num="83" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="84" count="0" type="stmt"/>
+        <line num="86" count="0" type="cond" truecount="0" falsecount="5"/>
+        <line num="87" count="0" type="stmt"/>
+        <line num="91" count="0" type="stmt"/>
+        <line num="97" count="0" type="stmt"/>
+        <line num="99" count="0" type="stmt"/>
+        <line num="103" count="0" type="stmt"/>
+        <line num="104" count="0" type="stmt"/>
+        <line num="105" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="106" count="0" type="stmt"/>
+        <line num="107" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="108" count="0" type="stmt"/>
+        <line num="109" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="110" count="0" type="stmt"/>
+        <line num="116" count="0" type="stmt"/>
+        <line num="118" count="0" type="stmt"/>
+        <line num="122" count="3" type="stmt"/>
+        <line num="123" count="3" type="stmt"/>
+        <line num="124" count="3" type="cond" truecount="4" falsecount="0"/>
+        <line num="125" count="2" type="stmt"/>
+        <line num="126" count="6" type="cond" truecount="1" falsecount="1"/>
+        <line num="127" count="6" type="stmt"/>
+        <line num="128" count="6" type="cond" truecount="5" falsecount="0"/>
+        <line num="129" count="1" type="stmt"/>
+        <line num="134" count="3" type="stmt"/>
+        <line num="138" count="2" type="stmt"/>
+        <line num="140" count="2" type="stmt"/>
+        <line num="141" count="2" type="stmt"/>
+        <line num="142" count="2" type="stmt"/>
+        <line num="144" count="2" type="stmt"/>
+        <line num="145" count="3" type="stmt"/>
+        <line num="149" count="3" type="stmt"/>
+        <line num="151" count="2" type="stmt"/>
+        <line num="152" count="2" type="stmt"/>
+        <line num="156" count="1" type="stmt"/>
+        <line num="163" count="0" type="cond" truecount="0" falsecount="2"/>
+      </file>
     </package>
     <package name="build.functions">
       <metrics statements="29" coveredstatements="10" conditionals="22" coveredconditionals="9" methods="14" coveredmethods="1"/>
       <file name="fetchData.js" path="C:\Users\mnoth\OneDrive\Seen\build\functions\fetchData.js">
         <metrics statements="20" coveredstatements="7" conditionals="18" coveredconditionals="9" methods="11" coveredmethods="1"/>
-        <line num="2" count="1" type="cond" truecount="3" falsecount="0"/>
+        <line num="2" count="2" type="cond" truecount="3" falsecount="0"/>
         <line num="3" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="4" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="5" count="0" type="stmt"/>
         <line num="6" count="0" type="stmt"/>
         <line num="7" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="8" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="11" count="1" type="cond" truecount="3" falsecount="0"/>
-        <line num="12" count="1" type="cond" truecount="3" falsecount="1"/>
-        <line num="14" count="1" type="stmt"/>
-        <line num="15" count="1" type="stmt"/>
-        <line num="16" count="1" type="stmt"/>
+        <line num="11" count="2" type="cond" truecount="3" falsecount="0"/>
+        <line num="12" count="2" type="cond" truecount="3" falsecount="1"/>
+        <line num="14" count="2" type="stmt"/>
+        <line num="15" count="2" type="stmt"/>
+        <line num="16" count="2" type="stmt"/>
         <line num="18" count="0" type="stmt"/>
         <line num="19" count="0" type="stmt"/>
         <line num="20" count="0" type="stmt"/>
@@ -104,23 +193,23 @@
         <line num="22" count="0" type="stmt"/>
         <line num="33" count="0" type="stmt"/>
         <line num="36" count="0" type="stmt"/>
-        <line num="40" count="1" type="stmt"/>
+        <line num="40" count="2" type="stmt"/>
       </file>
       <file name="sendOutput.js" path="C:\Users\mnoth\OneDrive\Seen\build\functions\sendOutput.js">
         <metrics statements="9" coveredstatements="3" conditionals="4" coveredconditionals="0" methods="3" coveredmethods="0"/>
-        <line num="2" count="1" type="stmt"/>
-        <line num="3" count="1" type="stmt"/>
+        <line num="2" count="2" type="stmt"/>
+        <line num="3" count="2" type="stmt"/>
         <line num="5" count="0" type="stmt"/>
         <line num="6" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="7" count="0" type="stmt"/>
         <line num="10" count="0" type="stmt"/>
         <line num="13" count="0" type="stmt"/>
-        <line num="15" count="1" type="stmt"/>
+        <line num="15" count="2" type="stmt"/>
         <line num="22" count="0" type="cond" truecount="0" falsecount="2"/>
       </file>
     </package>
     <package name="src">
-      <metrics statements="58" coveredstatements="42" conditionals="33" coveredconditionals="22" methods="13" coveredmethods="9"/>
+      <metrics statements="127" coveredstatements="65" conditionals="69" coveredconditionals="30" methods="30" coveredmethods="15"/>
       <file name="api1.ts" path="C:\Users\mnoth\OneDrive\Seen\src\api1.ts">
         <metrics statements="58" coveredstatements="42" conditionals="33" coveredconditionals="22" methods="13" coveredmethods="9"/>
         <line num="1" count="1" type="stmt"/>
@@ -182,13 +271,85 @@
         <line num="133" count="1" type="stmt"/>
         <line num="144" count="1" type="cond" truecount="0" falsecount="2"/>
       </file>
+      <file name="api2.ts" path="C:\Users\mnoth\OneDrive\Seen\src\api2.ts">
+        <metrics statements="69" coveredstatements="23" conditionals="36" coveredconditionals="8" methods="17" coveredmethods="6"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="13" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="18" count="0" type="stmt"/>
+        <line num="19" count="0" type="stmt"/>
+        <line num="22" count="0" type="stmt"/>
+        <line num="23" count="0" type="stmt"/>
+        <line num="24" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="25" count="0" type="stmt"/>
+        <line num="26" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="27" count="0" type="stmt"/>
+        <line num="29" count="0" type="stmt"/>
+        <line num="30" count="0" type="stmt"/>
+        <line num="32" count="0" type="stmt"/>
+        <line num="33" count="0" type="stmt"/>
+        <line num="35" count="0" type="stmt"/>
+        <line num="36" count="0" type="stmt"/>
+        <line num="39" count="0" type="stmt"/>
+        <line num="42" count="0" type="stmt"/>
+        <line num="48" count="0" type="stmt"/>
+        <line num="49" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="50" count="0" type="stmt"/>
+        <line num="51" count="0" type="cond" truecount="0" falsecount="3"/>
+        <line num="52" count="0" type="stmt"/>
+        <line num="57" count="0" type="stmt"/>
+        <line num="62" count="0" type="stmt"/>
+        <line num="65" count="0" type="stmt"/>
+        <line num="70" count="0" type="stmt"/>
+        <line num="71" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="73" count="0" type="stmt"/>
+        <line num="74" count="0" type="stmt"/>
+        <line num="76" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="77" count="0" type="stmt"/>
+        <line num="78" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="79" count="0" type="stmt"/>
+        <line num="82" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="83" count="0" type="stmt"/>
+        <line num="88" count="0" type="stmt"/>
+        <line num="93" count="0" type="stmt"/>
+        <line num="96" count="0" type="stmt"/>
+        <line num="102" count="0" type="stmt"/>
+        <line num="103" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="104" count="0" type="stmt"/>
+        <line num="105" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="106" count="0" type="stmt"/>
+        <line num="107" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="108" count="0" type="stmt"/>
+        <line num="114" count="0" type="stmt"/>
+        <line num="117" count="0" type="stmt"/>
+        <line num="122" count="3" type="stmt"/>
+        <line num="123" count="3" type="cond" truecount="3" falsecount="0"/>
+        <line num="124" count="2" type="stmt"/>
+        <line num="125" count="6" type="cond" truecount="1" falsecount="0"/>
+        <line num="126" count="6" type="stmt"/>
+        <line num="128" count="6" type="cond" truecount="4" falsecount="0"/>
+        <line num="129" count="1" type="stmt"/>
+        <line num="136" count="3" type="stmt"/>
+        <line num="142" count="2" type="stmt"/>
+        <line num="143" count="2" type="stmt"/>
+        <line num="144" count="2" type="stmt"/>
+        <line num="146" count="2" type="stmt"/>
+        <line num="147" count="3" type="stmt"/>
+        <line num="151" count="3" type="stmt"/>
+        <line num="154" count="2" type="stmt"/>
+        <line num="156" count="2" type="stmt"/>
+        <line num="166" count="1" type="cond" truecount="0" falsecount="2"/>
+      </file>
     </package>
     <package name="src.functions">
       <metrics statements="15" coveredstatements="4" conditionals="4" coveredconditionals="0" methods="5" coveredmethods="0"/>
       <file name="fetchData.ts" path="C:\Users\mnoth\OneDrive\Seen\src\functions\fetchData.ts">
         <metrics statements="8" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="0"/>
-        <line num="1" count="1" type="stmt"/>
-        <line num="4" count="1" type="stmt"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="4" count="2" type="stmt"/>
         <line num="5" count="0" type="stmt"/>
         <line num="6" count="0" type="stmt"/>
         <line num="7" count="0" type="stmt"/>
@@ -198,13 +359,13 @@
       </file>
       <file name="sendOutput.ts" path="C:\Users\mnoth\OneDrive\Seen\src\functions\sendOutput.ts">
         <metrics statements="7" coveredstatements="2" conditionals="4" coveredconditionals="0" methods="3" coveredmethods="0"/>
-        <line num="3" count="1" type="stmt"/>
+        <line num="3" count="2" type="stmt"/>
         <line num="4" count="0" type="stmt"/>
         <line num="5" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="6" count="0" type="stmt"/>
         <line num="8" count="0" type="stmt"/>
         <line num="11" count="0" type="stmt"/>
-        <line num="19" count="1" type="cond" truecount="0" falsecount="2"/>
+        <line num="19" count="2" type="cond" truecount="0" falsecount="2"/>
       </file>
     </package>
   </project>

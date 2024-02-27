@@ -63,9 +63,6 @@ class Main {
                     }
                 });
             }
-            else {
-                console.error('No transactions found');
-            }
             return p2PArray;
         });
     }
@@ -93,10 +90,7 @@ class Main {
                     });
                 });
             }
-            else {
-                console.error('No transactions data available');
-            }
-            return (p2PLinkCustomers);
+            return p2PLinkCustomers;
         });
     }
     getDevices(filteredTransactions) {
@@ -111,9 +105,6 @@ class Main {
                         }
                     }
                 });
-            }
-            else {
-                console.error('No transactions found');
             }
             return deviceArray;
         });
@@ -130,9 +121,6 @@ class Main {
                         }
                     }
                 });
-            }
-            else {
-                console.error('No transactions data available');
             }
             return relatedIDs;
         });
