@@ -1,5 +1,4 @@
 import express, {Application, Request, Response} from 'express';
-import * as readline from 'readline';
 import * as transactionInterfaces from './interfaces/transactionInterfaces';
 import * as api1Interfaces from './interfaces/api1Interfaces';
 import { sendOutput } from './functions/sendOutput';
@@ -15,48 +14,43 @@ export class Main {
         this.port = port;
     }
 
-    async start() {
+    async start(customerId: number) {
         this.exp.listen(this.port, ()=> {
             console.log(`Connected successfully on port ${this.port}`);
         });
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
+
         let transactions = await fetchData();
         let filteredTransactions: transactionInterfaces.Transaction[] = [];
-        rl.question('Enter the customer ID: ', async (customerId: string) => {
-            if (customerId != "0"){
-                console.log(`Customer ID entered: ${customerId}`);
-                if (transactions && transactions.length > 0) {
-                    filteredTransactions = transactions.filter((transaction: { customerId: number }) => transaction.customerId === parseInt(customerId));
-                    
-                    let rootObj: api1Interfaces.RootObject;
-                    let rootTransactions: api1Interfaces.TransactionFin[];
-                    let nonRootTransactions: transactionInterfaces.Transaction[];
 
-                    [rootObj, rootTransactions, nonRootTransactions] = await this.buildRootTransactions(filteredTransactions);
-                    let finalOutput: api1Interfaces.RootObject = await this.buildRoot(rootObj, nonRootTransactions, rootTransactions);
+        if (customerId){
+            console.log(`Customer ID entered: ${customerId}`);
+            if (transactions && transactions.length > 0) {
+                filteredTransactions = transactions.filter((transaction: { customerId: number }) => transaction.customerId === customerId);
+                
+                let rootObj: api1Interfaces.RootObject;
+                let rootTransactions: api1Interfaces.TransactionFin[];
+                let nonRootTransactions: transactionInterfaces.Transaction[];
 
-                    sendOutput(finalOutput, this.exp);
+                [rootObj, rootTransactions, nonRootTransactions] = await this.buildRootTransactions(filteredTransactions);
+                let finalOutput: api1Interfaces.RootObject = await this.buildRoot(rootObj, nonRootTransactions, rootTransactions);
 
-                } else {
-                    console.error('No transactions data available');
-                }
+                sendOutput(finalOutput, this.exp);
+
             } else {
-                process.exit();
+                let rootObj: api1Interfaces.RootObject= {transactions: []};
+                sendOutput(rootObj, this.exp);
             }
-            rl.close();
-
-        });
+        } else {
+            process.exit();
+        }
     }   
 
-    private async buildRootTransactions(filteredTransactions: transactionInterfaces.Transaction[]): Promise<[api1Interfaces.RootObject, api1Interfaces.TransactionFin[], transactionInterfaces.Transaction[]]> {
+    public async buildRootTransactions(filteredTransactions: transactionInterfaces.Transaction[]): Promise<[api1Interfaces.RootObject, api1Interfaces.TransactionFin[], transactionInterfaces.Transaction[]]> {
         let rootObj: api1Interfaces.RootObject = { transactions: [] };
         let rootTransactions: api1Interfaces.TransactionFin[] = [];
         let nonRootTransactions: transactionInterfaces.Transaction[] = [];
-
-        if (filteredTransactions.length > 0) {
+    
+        if (filteredTransactions && filteredTransactions.length > 0) {
             filteredTransactions.forEach((transaction) => {
                 if (transaction.metadata.relatedTransactionId === undefined || transaction.metadata.relatedTransactionId === null) {
                     let newTransaction: api1Interfaces.TransactionFin = {
@@ -81,16 +75,17 @@ export class Main {
             });
 
             rootObj = {transactions: rootTransactions};
-
         } else {
-            console.error('No transactions found');
+            rootObj = { transactions: [] };
+            rootTransactions = [];
+            nonRootTransactions = [];
         }
-
+    
         return [rootObj, rootTransactions, nonRootTransactions];
-    }   
+    }
 
 
-    private async buildRoot(rootObj: api1Interfaces.RootObject, nonRootTransactions: transactionInterfaces.Transaction[], rootTransactions: api1Interfaces.TransactionFin[]) {
+    public async buildRoot(rootObj: api1Interfaces.RootObject, nonRootTransactions: transactionInterfaces.Transaction[], rootTransactions: api1Interfaces.TransactionFin[]) {
         let similarTransactions: transactionInterfaces.Transaction[];
 
         if (rootObj && rootObj.transactions && rootObj.transactions.length > 0 && nonRootTransactions.length > 0) {
@@ -101,25 +96,23 @@ export class Main {
                         similarTransactions.push(nonRootTransaction);
                     }
                 });
-
                 if (similarTransactions.length > 0) {
                     await this.buildTimeLine(similarTransactions, rootTransaction);
                 }
             });
         } else {
             if (rootTransactions.length === 0) {
-                console.error('No root transactions found');
+                rootTransactions = [];
             };
             if (nonRootTransactions.length === 0) {
-                console.error('No non-root transactions found');
+                nonRootTransactions = [];
             };
         }
 
         return(rootObj);
-
     }
 
-    private async buildTimeLine(similarTransactions: transactionInterfaces.Transaction[], rootTransaction: api1Interfaces.TransactionFin) {
+    public async buildTimeLine(similarTransactions: transactionInterfaces.Transaction[], rootTransaction: api1Interfaces.TransactionFin) {
         if (similarTransactions.length > 0) {
             let latestReference: number | undefined = rootTransaction.transactionId;
             similarTransactions.forEach((transaction) => {
@@ -136,8 +129,9 @@ export class Main {
                     latestReference = transaction.transactionId;
                 }
             });
+        } else {
+            return;
         }
-
     }
 
 }

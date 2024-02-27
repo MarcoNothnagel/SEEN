@@ -1,5 +1,4 @@
 import express, {Application, Request, Response} from 'express';
-import * as readline from 'readline';
 import * as transactionInterfaces from './interfaces/transactionInterfaces';
 import * as api2Interfaces from './interfaces/api2Interfaces';
 import { sendOutput } from './functions/sendOutput';
@@ -15,24 +14,20 @@ export class Main {
         this.port = port;
     }
 
-    async start() {
+    async start(customerId: number) {
         this.exp.listen(this.port, ()=> {
             console.log(`Connected successfully on port ${this.port}`);
         });
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
+
         let transactions = await fetchData();
         let filteredTransactions: transactionInterfaces.Transaction[] = [];
-        rl.question('Enter the customer ID: ', async (customerId: string) => {
-            if (customerId != "0"){
+            if (customerId){
                 console.log(`Customer ID entered: ${customerId}`);
                 if (transactions && transactions.length > 0) {
-                    filteredTransactions = transactions.filter((transaction: { customerId: number }) => transaction.customerId === parseInt(customerId));
+                    filteredTransactions = transactions.filter((transaction: { customerId: number }) => transaction.customerId === customerId);
 
                     let deviceArray: string[] = await this.getDevices(filteredTransactions);
-                    let deviceLinkCustomers: number[] = await this.findDeviceLink(transactions, deviceArray, parseInt(customerId));
+                    let deviceLinkCustomers: number[] = await this.findDeviceLink(transactions, deviceArray, customerId);
 
                     let p2PArray: api2Interfaces.P2PData[] = await this.getP2PTransactions(filteredTransactions);
                     let transactionLinkCustomers: api2Interfaces.RelatedCustomer[] = await this.findP2PLink(transactions, p2PArray);
@@ -46,9 +41,6 @@ export class Main {
             } else {
                 process.exit();
             }
-            rl.close();
-
-        });
     }  
 
 

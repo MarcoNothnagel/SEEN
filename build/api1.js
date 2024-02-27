@@ -1,27 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -37,47 +14,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Main = void 0;
 const express_1 = __importDefault(require("express"));
-const readline = __importStar(require("readline"));
-const sendOutput_1 = require("./sendOutput");
-const fetchData_1 = require("./fetchData");
+const sendOutput_1 = require("./functions/sendOutput");
+const fetchData_1 = require("./functions/fetchData");
 class Main {
     constructor(port) {
         this.exp = (0, express_1.default)();
         this.port = port;
     }
-    start() {
+    start(customerId) {
         return __awaiter(this, void 0, void 0, function* () {
             this.exp.listen(this.port, () => {
                 console.log(`Connected successfully on port ${this.port}`);
             });
-            const rl = readline.createInterface({
-                input: process.stdin,
-                output: process.stdout
-            });
             let transactions = yield (0, fetchData_1.fetchData)();
             let filteredTransactions = [];
-            rl.question('Enter the customer ID: ', (customerId) => __awaiter(this, void 0, void 0, function* () {
-                if (customerId != "0") {
-                    console.log(`Customer ID entered: ${customerId}`);
-                    if (transactions && transactions.length > 0) {
-                        filteredTransactions = transactions.filter((transaction) => transaction.customerId === parseInt(customerId));
-                        let rootObj;
-                        let rootTransactions;
-                        let nonRootTransactions;
-                        [rootObj, rootTransactions, nonRootTransactions] = yield this.buildRootTransactions(filteredTransactions);
-                        let finalOutput = yield this.buildRoot(rootObj, nonRootTransactions, rootTransactions);
-                        console.log(JSON.stringify(finalOutput, null, 2));
-                        (0, sendOutput_1.sendOutput)(finalOutput, this.exp);
-                    }
-                    else {
-                        console.error('No transactions data available');
-                    }
+            if (customerId) {
+                console.log(`Customer ID entered: ${customerId}`);
+                if (transactions && transactions.length > 0) {
+                    filteredTransactions = transactions.filter((transaction) => transaction.customerId === customerId);
+                    let rootObj;
+                    let rootTransactions;
+                    let nonRootTransactions;
+                    [rootObj, rootTransactions, nonRootTransactions] = yield this.buildRootTransactions(filteredTransactions);
+                    let finalOutput = yield this.buildRoot(rootObj, nonRootTransactions, rootTransactions);
+                    (0, sendOutput_1.sendOutput)(finalOutput, this.exp);
                 }
                 else {
-                    process.exit();
+                    let rootObj = { transactions: [] };
+                    (0, sendOutput_1.sendOutput)(rootObj, this.exp);
                 }
-                rl.close();
-            }));
+            }
+            else {
+                process.exit();
+            }
         });
     }
     buildRootTransactions(filteredTransactions) {
@@ -85,7 +54,7 @@ class Main {
             let rootObj = { transactions: [] };
             let rootTransactions = [];
             let nonRootTransactions = [];
-            if (filteredTransactions.length > 0) {
+            if (filteredTransactions && filteredTransactions.length > 0) {
                 filteredTransactions.forEach((transaction) => {
                     if (transaction.metadata.relatedTransactionId === undefined || transaction.metadata.relatedTransactionId === null) {
                         let newTransaction = {
@@ -112,7 +81,9 @@ class Main {
                 rootObj = { transactions: rootTransactions };
             }
             else {
-                console.error('No transactions found');
+                rootObj = { transactions: [] };
+                rootTransactions = [];
+                nonRootTransactions = [];
             }
             return [rootObj, rootTransactions, nonRootTransactions];
         });
@@ -135,11 +106,11 @@ class Main {
             }
             else {
                 if (rootTransactions.length === 0) {
-                    console.error('No root transactions found');
+                    rootTransactions = [];
                 }
                 ;
                 if (nonRootTransactions.length === 0) {
-                    console.error('No non-root transactions found');
+                    nonRootTransactions = [];
                 }
                 ;
             }
@@ -164,6 +135,9 @@ class Main {
                         latestReference = transaction.transactionId;
                     }
                 });
+            }
+            else {
+                return;
             }
         });
     }
