@@ -1,3 +1,5 @@
+// all of the unique interfaces used by api2
+
 export interface P2PData {
   transactionDate: string;
   transactionType: string;

@@ -10,12 +10,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const api2_1 = require("../api2");
+// import { sendOutput } from '../functions/sendOutput';
+// import { fetchData } from '../functions/fetchData';
 const main = new api2_1.Main(3000);
 describe('Main', () => {
     // tests for start()
     // TODO. struggling with getting the mock functions to work
     // tests for getP2PTransactions()
-    it('should handle empty transactions', () => __awaiter(void 0, void 0, void 0, function* () {
+    test('handle empty transactions', () => __awaiter(void 0, void 0, void 0, function* () {
         const filteredTransactions = [];
         const expectedP2PArray = [];
         const actualP2PArray = yield main.getP2PTransactions(filteredTransactions);

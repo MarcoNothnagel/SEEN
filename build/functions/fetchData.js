@@ -14,11 +14,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fetchData = void 0;
 const axios_1 = __importDefault(require("axios"));
+// simply used to fetch all data
 function fetchData() {
     return __awaiter(this, void 0, void 0, function* () {
         let transactions = [];
         try {
+            // do an acios get call to read the json file
             const response = yield axios_1.default.get('https://cdn.seen.com/challenge/transactions-v2.json');
+            // populate the transactions interface with all transaction values
             transactions = response.data.map((item) => ({
                 transactionId: item.transactionId,
                 authorizationCode: item.authorizationCode,
@@ -27,13 +30,14 @@ function fetchData() {
                 transactionType: item.transactionType,
                 transactionStatus: item.transactionStatus,
                 description: item.description,
-                amount: Number(item.amount).toFixed(2),
+                amount: Number(item.amount).toFixed(2), // enforce the value being of type number
                 metadata: item.metadata
             }));
-            return (transactions);
+            return (transactions); // return a list of all transactions
+            // try catch with an error for when the data cannot be retreived
         }
         catch (error) {
-            console.error('Error fetching data:', error);
+            console.error('Error fetching data:', error); // might have to revise for touch ups
         }
     });
 }

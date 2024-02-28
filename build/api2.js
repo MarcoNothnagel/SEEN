@@ -29,7 +29,6 @@ class Main {
             let transactions = yield (0, fetchData_1.fetchData)();
             let filteredTransactions = [];
             if (customerId) {
-                console.log(`Customer ID entered: ${customerId}`);
                 if (transactions && transactions.length > 0) {
                     filteredTransactions = transactions.filter((transaction) => transaction.customerId === customerId);
                     let deviceArray = yield this.getDevices(filteredTransactions);

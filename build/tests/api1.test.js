@@ -10,6 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const api1_1 = require("../api1");
+// import { sendOutput } from '../functions/sendOutput';
+// import { fetchData } from '../functions/fetchData';
 const main = new api1_1.Main(3000);
 describe('Main', () => {
     // tests for start()
