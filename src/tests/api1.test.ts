@@ -188,6 +188,8 @@ describe('Main', () => {
 
 
     // TODO. test fails because no chronological order. update api1 to account
+    // the thing is it works in live because it traces from transaction reference which always tends to be in chronological order
+    // this test may be irrelevant but might update method to account for this very special test case
     
     // test('buildTimeLine with multiple matching transactions', async () => {
     // const matchingTransaction1: transactionInterfaces.Transaction = {
